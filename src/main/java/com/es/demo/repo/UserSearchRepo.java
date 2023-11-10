@@ -5,7 +5,6 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.stereotype.Repository;
 
-@NoRepositoryBean
+@Repository
 public interface UserSearchRepo extends ElasticsearchRepository<UserDO,Long> {
-    long getCount();
 }
