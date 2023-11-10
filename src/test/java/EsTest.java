@@ -1,0 +1,28 @@
+import com.es.demo.EsDemoApplication;
+import com.es.demo.entity.UserDO;
+import com.es.demo.repo.impl.UserSearchRepoImpl;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.Optional;
+
+@SpringBootTest(classes = EsDemoApplication.class)
+public class EsTest {
+    @Autowired
+    private UserSearchRepoImpl userSearchRepo;
+    @Test
+    public void save(){
+        UserDO userDO = new UserDO();
+        userDO.setId(1L);
+        userDO.setName("zhanyou");
+        userDO.setAge(18);
+        UserDO save = userSearchRepo.save(userDO);
+        System.out.println(save);
+    }
+    @Test
+    public void query(){
+        Optional<UserDO> optional = userSearchRepo.findById(1L);
+        System.out.println(optional.orElse(null));
+    }
+}
