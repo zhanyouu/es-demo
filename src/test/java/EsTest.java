@@ -15,7 +15,7 @@ public class EsTest {
     @Test
     public void save(){
         UserDO userDO = new UserDO();
-        userDO.setId(1L);
+        userDO.setId(2L);
         userDO.setName("zhanyou");
         userDO.setAge(18);
         UserDO save = userSearchRepo.save(userDO);

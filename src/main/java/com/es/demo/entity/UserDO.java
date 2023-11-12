@@ -11,8 +11,10 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 public class UserDO {
     @Id
     private Long id;
-    @Field(store = true, type = FieldType.Text)
+    @Field(type = FieldType.Keyword)
     private String name;
-    @Field(store = true, type = FieldType.Integer)
+    @Field(type = FieldType.Integer)
     private Integer age;
+    @Field(type = FieldType.Text,analyzer = "ik_smart")
+    private String desc;
 }
