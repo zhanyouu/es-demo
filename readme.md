@@ -9,28 +9,53 @@ docker cp .\ik\ es:/usr/share/elasticsearch/plugins
 
 ### es常用DSL命令
 ```java
+#分词
+POST /_analyze
+{
+"text": "我是中国人",
+"analyzer": "ik_smart"
+}
 #创建索引
 PUT /user
 {
-  "mappings": {
-    "properties": {
-      "name":{
-        "type": "keyword"
-      }
-    , 
-      "age":{
-        "type": "integer",
-        "index": false
-      }
-    ,      
-    "desc":{
-        "type": "text",
-        "analyzer": "ik_smart"
-      }
-  }
-  }
+"mappings": {
+"properties": {
+"name":{
+"type": "keyword"
 }
-
+,
+"age":{
+"type": "integer",
+"index": false
+}
+,
+"desc":{
+"type": "text",
+"analyzer": "ik_smart"
+}
+}
+}
+}
+PUT /user
+{
+"mappings": {
+"properties": {
+"name":{
+"type": "keyword"
+}
+,
+"age":{
+"type": "integer",
+"index": false
+}
+,
+"desc":{
+"type": "text",
+"analyzer": "ik_smart"
+}
+}
+}
+}
 #查询索引
 GET /user
 
@@ -40,42 +65,88 @@ DELETE /user
 #修改索引的mapping
 PUT /user/_mapping
 {
-  "properties":{
-    "sex":{
-      "type":"keyword"
-    }
-  }
+"properties":{
+"sex":{
+"type":"keyword"
+}
+}
 }
 
 #创建文档
 POST /user/_doc/1
 {
-  "name":"zhanyou",
-  "age":30,
-  "desc":"我是中国人"
+"name":"zhanyou",
+"age":30,
+"desc":"我是中国人"
+}
+POST /user3/_doc/1
+{
+"name":"zhanyou",
+"age":30,
+"desc":"我是中国人"
 }
 
 #全量更新文档（删除原来文档，创建新文档）
 PUT /user/_doc/1
 {
-  "name":"zhanyou",
-  "age":30,
-  "desc":"我是中国人"
+"name":"zhanyou",
+"age":30,
+"desc":"我是中国人"
 }
 
 #增量更新文档
 POST /user/_update/1
 {
-  "doc":{
-    "age":20
-  }
+"doc":{
+"age":20
+}
 }
 
 #查询文档
-GET /user/_doc/2
+GET /user/_doc/1
+
+#全文查询（先分词，再查询）
+GET /user/_doc/_search
+{
+"query":{
+"match":{
+"desc":"我真的是中国人"
+}
+}
+}
+
+#多个字段全文查询（先分词，再查询）
+GET /user/_doc/_search
+{
+"query":{
+"multi_match" : {
+"query": "中国人",
+"fields": [ "name", "desc" ]
+}
+}
+}
+#精确查询(不分词查询)
+GET /user/_doc/_search
+{
+"query":{
+"term":{
+"desc":"中国人"
+}
+}
+}
+#范围查询
+GET /user/_doc/_search
+{
+"query":{
+"range":{
+"age":{
+"lt":30,
+"gt":10
+}
+}
+}
+}
 
 #删除文档
 DELETE /user/_doc/1
-
-
 ```
