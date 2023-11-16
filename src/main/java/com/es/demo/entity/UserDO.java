@@ -9,6 +9,8 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 @Data
 @Document(indexName = "user")
 public class UserDO {
+    public final static String INDEX_NAME = "user";
+    public final static Long TIME_OUT = 8000L;
     public final static String NAME = "name";
     public final static String AGE = "age";
 

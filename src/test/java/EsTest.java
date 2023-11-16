@@ -8,10 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
-import org.springframework.data.elasticsearch.core.SearchHit;
-import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.*;
+import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.BaseQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.Query;
@@ -26,7 +24,7 @@ public class EsTest {
     @Autowired
     private UserSearchRepo userSearchRepo;
     @Autowired
-    protected ElasticsearchOperations elasticsearchOperations;
+    private ElasticsearchRestTemplate elasticsearchRestTemplate;
 
     @Test
     public void saveTest() {
@@ -50,12 +48,15 @@ public class EsTest {
     @Test
     public void countTest() {
         Query query = new NativeSearchQueryBuilder().withQuery(matchAllQuery()).build();
-        long count = elasticsearchOperations.count(query, UserDO.class);
+        long count = elasticsearchRestTemplate.count(query, UserDO.class);
         System.out.println(count);
     }
 
+    /**
+     * 分页查询
+     */
     @Test
-    public void ListTest() {
+    public void pageTest() {
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
         //文本检索
         boolQuery.must(QueryBuilders.matchQuery(UserDO.NAME, "占友"));
@@ -64,12 +65,42 @@ public class EsTest {
         BaseQuery query = new NativeSearchQueryBuilder().withQuery(boolQuery)
                 .withPageable(PageRequest.of(0, 10, Sort.by(UserDO.AGE)))
                 .build();
-        SearchHits<UserDO> result = elasticsearchOperations.search(query, UserDO.class);
+        SearchHits<UserDO> result = elasticsearchRestTemplate.search(query, UserDO.class);
         List<SearchHit<UserDO>> searchHits = result.getSearchHits();
         for (int i = 0; i < searchHits.size(); i++) {
             UserDO content = searchHits.get(i).getContent();
             System.out.println(content);
         }
+    }
 
+    /**
+     * 滚动查询
+     */
+    @Test
+    public void scrollTest() {
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        //文本检索
+        boolQuery.must(QueryBuilders.matchQuery(UserDO.NAME, "占友"));
+        //范围检索
+        boolQuery.must(QueryBuilders.rangeQuery(UserDO.AGE).from(1).to(101));
+        BaseQuery query = new NativeSearchQueryBuilder().withQuery(boolQuery)
+                .withPageable(PageRequest.of(0, 10, Sort.by(UserDO.AGE)))
+                .build();
+        SearchScrollHits<UserDO> searchScrollHits = elasticsearchRestTemplate.searchScrollStart(UserDO.TIME_OUT, query,
+                UserDO.class, IndexCoordinates.of(UserDO.INDEX_NAME));
+        while (searchScrollHits.hasSearchHits()) {
+            List<SearchHit<UserDO>> searchHit = searchScrollHits.getSearchHits();
+            printUserDOs(searchHit);
+            System.out.println(searchScrollHits.getScrollId());
+            searchScrollHits = elasticsearchRestTemplate.searchScrollContinue(searchScrollHits.getScrollId(),
+                    UserDO.TIME_OUT, UserDO.class, IndexCoordinates.of(UserDO.INDEX_NAME));
+        }
+    }
+
+    private void printUserDOs(List<SearchHit<UserDO>> searchHit) {
+        for (int i = 0; i < searchHit.size(); i++) {
+            UserDO content = searchHit.get(i).getContent();
+            System.out.println(content);
+        }
     }
 }
