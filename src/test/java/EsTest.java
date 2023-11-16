@@ -4,7 +4,7 @@ import com.es.demo.repo.UserSearchRepo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 
 import java.util.Optional;
 
@@ -12,6 +12,8 @@ import java.util.Optional;
 public class EsTest {
     @Autowired
     private UserSearchRepo userSearchRepo;
+    @Autowired
+    protected ElasticsearchOperations elasticsearchOperations;
     @Test
     public void save(){
         UserDO userDO = new UserDO();
