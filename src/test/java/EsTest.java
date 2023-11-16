@@ -7,6 +7,8 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
@@ -48,11 +50,15 @@ public class EsTest {
         System.out.println(count);
     }
     @Test
-    public void pageTest(){
+    public void ListTest(){
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        //文本检索
         boolQuery.must(QueryBuilders.matchQuery(UserDO.NAME,"占友"));
-        boolQuery.must(QueryBuilders.termQuery(UserDO.AGE,10));
-        Query query = new NativeSearchQueryBuilder().withQuery(boolQuery).build();
+        //范围检索
+        boolQuery.must(QueryBuilders.rangeQuery(UserDO.AGE).from(1).to(50));
+        Query query = new NativeSearchQueryBuilder().withQuery(boolQuery)
+                .withPageable(PageRequest.of(0,10, Sort.by(UserDO.AGE)))
+                .build();
         SearchHits<UserDO> result = elasticsearchOperations.search(query, UserDO.class);
         List<SearchHit<UserDO>> searchHits = result.getSearchHits();
         for (int i = 0; i < searchHits.size(); i++) {
