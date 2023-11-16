@@ -9,6 +9,9 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 @Data
 @Document(indexName = "user")
 public class UserDO {
+    public final static String NAME = "name";
+    public final static String AGE = "age";
+
     @Id
     private Long id;
     @Field(type = FieldType.Text)
@@ -17,4 +20,14 @@ public class UserDO {
     private Integer age;
     @Field(type = FieldType.Text,analyzer = "ik_smart")
     private String desc;
+
+    @Override
+    public String toString() {
+        return "UserDO{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", age=" + age +
+                ", desc='" + desc + '\'' +
+                '}';
+    }
 }
